@@ -1,0 +1,45 @@
+*** Settings ***
+Resource          resources/keywords.txt
+
+*** Test Cases ***
+N-01_给CRM提供销售结算余额_必填参数缺失
+    ${headers}=    Set Headers
+    ${data}=    Create dictionary    userid=
+    Create Session    asc.fangbaba.cc    ${SC-URL}    headers=${headers}
+    ${resp}=    Post Request    asc.fangbaba.cc    /crm/stlmt/balance    data=${data}
+    ${jsondata}=    To Json    ${resp.text}    pretty_print=True
+    log    ${jsondata}
+    Dictionary Should Contain Key    ${resp.json()}    errorMessage
+    Dictionary Should Contain Value    ${resp.json()}    接口参数userid不能为空.
+
+N-02_给CRM提供销售结算余额_必填参数不存在或无效
+    ${headers}=    Set Headers
+    ${data}=    Create dictionary    userid=123@#￥
+    Create Session    asc.fangbaba.cc    ${SC-URL}    headers=${headers}
+    ${resp}=    Post Request    asc.fangbaba.cc    /crm/stlmt/balance    data=${data}
+    ${jsondata}=    To Json    ${resp.text}    pretty_print=True
+    log    ${jsondata}
+    ${a}    Get From Dictionary    ${resp.json()}    errorType
+    log    ${a}
+    Should Be Equal As Integers    ${a}    0
+
+N-03_给CRM提供销售结算账单_必填参数缺失
+    ${headers}=    Set Headers
+    ${data}=    Create dictionary    userid=    status=3    start=0    end=10
+    Create Session    asc.fangbaba.cc    ${SC-URL}    headers=${headers}
+    ${resp}=    Post Request    asc.fangbaba.cc    /crm/stlmt/bill    data=${data}
+    ${jsondata}=    To Json    ${resp.text}    pretty_print=True
+    log    ${jsondata}
+    Dictionary Should Contain Key    ${resp.json()}    errorMessage
+    Dictionary Should Contain Value    ${resp.json()}    接口参数userid不能为空.
+
+N-04_给CRM提供销售结算账单_必填参数不存在或无效
+    ${headers}=    Set Headers
+    ${data}=    Create dictionary    userid=213￥#%    status=3    start=0    end=10
+    Create Session    asc.fangbaba.cc    ${SC-URL}    headers=${headers}
+    ${resp}=    Post Request    asc.fangbaba.cc    /crm/stlmt/bill    data=${data}
+    ${jsondata}=    To Json    ${resp.text}    pretty_print=True
+    log    ${jsondata}
+    ${a}    Get From Dictionary    ${resp.json()}    errorType
+    log    ${a}
+    Should Be Equal As Integers    ${a}    0

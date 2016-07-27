@@ -1,0 +1,10 @@
+*** Settings ***
+Resource          resources/keywords.txt
+
+*** Test Cases ***
+N-01_刷新酒店库存接口
+    ${headers}=    Create Dictionary    Content-Type=application/json
+    ${json_data}    Dumps    {"header"={"function":"cancelpreorder","uuid":"2a2d6153e17943ceb24e5438dfc6b8bc","timestamp":"20150110238990","pmstypeid":"2","source":"2"},"data": {"hotelid":"111"}}
+    Create Session    pmsi.aisinopms.com    http://pmsi.aisinopms.com:8090    headers=${headers}
+    ${resp}=    Post Request    pmsi.aisinopms.com    /pms/rest/cancelpreorder    data=${json_data}
+    log    ${resp.text}

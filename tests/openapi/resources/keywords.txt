@@ -1,0 +1,37 @@
+*** Settings ***
+Library           Collections
+Library           String
+Library           RequestsLibrary
+Library           OperatingSystem
+Library           HttpLibrary.HTTP
+Resource          ../../../resources/utils.txt
+
+*** Variables ***
+${TOKEN}          b0baee9d279d34fa1dfd71aadb908c3f
+${HOTELID}        56ab38fae4b0156c43d15c8c
+${Content-Type}    application/x-www-form-urlencoded
+${URL}            http://openapi.fangbaba.cc
+${roomtypePmsNo}    56ab43926c4ee9ef09a655e1
+${roomtypeid}     30025
+${CRM-URL}        https://crmas.fangbaba.cc    # crmas的url
+${userId}         4503    # BossID for SC
+${hotelId_sc}     569cbfa7e4b0b240c313f78e    # hotelPMScode for SC
+
+*** Keywords ***
+Set Headers
+    ${headers}=    Create Dictionary    Content-Type=application/x-www-form-urlencoded    HOTELID=${HOTELID}    TOKEN=${TOKEN}
+    Return From Keyword    ${headers}
+
+Get Boss List Id
+    ${headers}=    Set Headers
+    ${data}=    Create dictionary    accountId=${userId}    hotelpms=${hotelId_sc}    start=0    pagesize=10
+    Create Session    openapi.fangbaba.cc    ${URL}    headers=${headers}
+    ${resp}=    Post Request    openapi.fangbaba.cc    /oms/stlmt/distributionBills    data=${data}
+    ${jsondata}=    To Json    ${resp.text}    pretty_print=True
+    log    ${jsondata}
+    Dictionary Should Contain Key    ${resp.json()}    _MSG_
+    Dictionary Should Contain Value    ${resp.json()}    OK
+    ${a}=    Get From Dictionary    ${resp.json()}    _DATA_
+    ${b}=    Get From Dictionary    ${a[0]}    id
+    log    ${b}
+    Return From Keyword    ${b}

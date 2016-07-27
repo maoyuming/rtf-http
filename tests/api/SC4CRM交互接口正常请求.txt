@@ -1,0 +1,27 @@
+*** Settings ***
+Resource          resources/keywords.txt
+
+*** Test Cases ***
+N-01_给CRM提供销售结算余额
+    ${headers}=    Set Headers
+    ${data}=    Create dictionary    userid=${userid}
+    Create Session    asc.fangbaba.cc    ${SC-URL}    headers=${headers}
+    ${resp}=    Post Request    asc.fangbaba.cc    /crm/stlmt/balance    data=${data}
+    ${jsondata}=    To Json    ${resp.text}    pretty_print=True
+    log    ${jsondata}
+    ${a}=    Get From Dictionary    ${resp.json()}    resultData
+    ${b}=    Get From Dictionary    ${a}    user
+    log    ${b}
+    Should Be Equal As Strings    ${b}    ${userid}
+
+N-02_给CRM提供销售结算账单
+    ${headers}=    Set Headers
+    ${data}=    Create dictionary    userid=${userid}    status=3    start=0    end=10
+    Create Session    asc.fangbaba.cc    ${SC-URL}    headers=${headers}
+    ${resp}=    Post Request    asc.fangbaba.cc    /crm/stlmt/bill    data=${data}
+    ${jsondata}=    To Json    ${resp.text}    pretty_print=True
+    log    ${jsondata}
+    ${a}=    Get From Dictionary    ${resp.json()}    resultData
+    ${b}=    Get From Dictionary    ${a}    user
+    log    ${b}
+    Should Be Equal As Strings    ${b}    ${userid}

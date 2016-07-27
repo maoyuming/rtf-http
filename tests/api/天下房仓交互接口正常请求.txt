@@ -1,0 +1,101 @@
+*** Settings ***
+Resource          resources/keywords.txt
+
+*** Test Cases ***
+N-01_查询订单状态
+    ${data}    Create dictionary    xml=<?xml version="1.0" encoding="utf-8"?><Request><Header TimeStamp="2015-05-09 15:19:40" PartnerCode="F01114815" RequestType= "getOrderStatus" Signature="C58EE70E3CF64A95D0AC0767579AA50B"/><GetOrderStatusRequest><SpOrderId>139811</SpOrderId></GetOrderStatusRequest></Request>
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/order/getOrderStatus    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    <OrderStatus>3</OrderStatus>
+
+N-02_取消订单
+    ${data}    Create dictionary    xml=<?xml version="1.0" encoding="utf-8"?><Request><Header TimeStamp="2014-02-16 15:36:48" PartnerCode="F01202154" RequestType="cancelHotelOrder" Signature="1A9C4DA2E0525DA64CEFD96B18F7981A"/><CancelHotelOrderRequest><SpOrderId>36371</SpOrderId><CancelReason>退改申请原因</CancelReason></CancelHotelOrderRequest></Request>
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/order/cancelHotelOrder    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    <ResultFlag>0</ResultFlag>
+
+N-03_试预订
+    ${data}    Create dictionary    xml=<?xml version="1.0" encoding="utf-8"?> <Request> <Header TimeStamp="2015-05-09 13:41:56" PartnerCode="F01202154" RequestType="checkRoomAvail" Signature="8CBC3445471C89849E8C5ADE9B08F121"/><CheckRoomAvailRequest><SpHotelId>2807</SpHotelId> <SpRoomTypeId>29976</SpRoomTypeId> <SpRatePlanId>29976</SpRatePlanId> <CheckInDate>2016-05-25</CheckInDate><CheckOutDate>2016-05-26</CheckOutDate> <RoomNum>1</RoomNum> </CheckRoomAvailRequest></Request>
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/order/checkRoomAvail    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    <ResultFlag>1</ResultFlag>
+
+N-04_添加酒店映射
+    ${data}    Create dictionary    json=[{"hotelid":431,"otaHotelid":123100,"hotelname":"深圳富邦酒店（景田店）","hoteladdr":"深圳福田区莲花路与景田西路交汇处（景秀中学对面）","channelid":8,"hotelphone":"0755-83660666转2/3","opt":"insert"}]
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/hotelmapping/sendSyncHotelMapping    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    true
+
+N-05_删除酒店映射
+    ${data}    Create dictionary    json=[{"hotelid":431,"otaHotelid":123100,"hotelname":"深圳富邦酒店（景田店）","hoteladdr":"深圳福田区莲花路与景田西路交汇处（景秀中学对面）","channelid":8,"hotelphone":"0755-83660666转2/3","opt":"delete"}]
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/hotelmapping/sendSyncHotelMapping    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    true
+
+N-06_添加房型映射
+    ${data}    Create dictionary    json=[{"hotelid":431,"otaHotelid":"123100","roomtypeid":'917',"roomtypename":"高低铺","otaRoomtypeid":"258615","otaRoomtypename":"标准单人房","channelid":8,"opt":"insert"}]
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/roomtypemapping/sendSyncRoomtypeMapping    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    true
+
+N-07_删除房型映射
+    ${data}    Create dictionary    json=[{"hotelid":431,"otaHotelid":"123100","roomtypeid":'915',"roomtypename":"标准双人间","otaRoomtypeid":"258617","otaRoomtypename":"豪华双人房","channelid":8,"opt":"delete"}]
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/roomtypemapping/sendSyncRoomtypeMapping    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    true
+
+N-08_添加价格计划
+    ${data}    Create dictionary    hotelid=431
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/hotel/price/syncrateplan    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    true
+
+N-09_删除价格计划
+    ${data}    Create dictionary    json=[{"hotelid":431,"otaHotelid":"123100","roomtypeid":'915',"roomtypename":"标准双人间","otaRoomtypeid":"258617","otaRoomtypename":"豪华双人房","channelid":8,"opt":"delete"}]
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/hotel/price/deleterateplan    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    true
+
+N-10_同步价格信息
+    ${data}    Create dictionary    hotelid=431
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/hotel/price/syncrateinfo    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    <ResultMsg>成功</ResultMsg>
+
+N-11_创建订单
+    ${data}    Create dictionary    xml=<?xml version="1.0" encoding="utf-8"?><Request><Header TimeStamp="2016-05-06 17:26:10" PartnerCode="S10025211" RequestType="createHotelOrder" Signature="5E47DF416B70A96FD09A530059247AE4"/><CreateHotelOrderRequest><SpHotelId>2813</SpHotelId><SpRoomTypeId>30046</SpRoomTypeId><SpRatePlanId>30046</SpRatePlanId><BedType/><CheckInDate>2016-06-07</CheckInDate><CheckOutDate>2016-06-08</CheckOutDate><RoomNum>1</RoomNum><ArrivalTime>14:00</ArrivalTime><LatestArrivalTime>17:00</LatestArrivalTime><TotalAmount>60</TotalAmount><Currency>CNY</Currency><FcOrderId>S65160506172639</FcOrderId><ConfirmType>1</ConfirmType><Remark/><SpecialRequirement/><ReservedItem/><SalePriceList><SalePriceItem><SaleDate>2016-06-07</SaleDate><SalePrice>60</SalePrice><BreakfastType>3</BreakfastType><BreakfastNum>0</BreakfastNum></SalePriceItem></SalePriceList><GuestInfoList><GuestInfo><GuestName>HELLO</GuestName><Nationality/></GuestInfo></GuestInfoList><Contacter><LinkMan>房仓test</LinkMan><LinkManPhone>13800138002</LinkManPhone><Email>123456@qq.com</Email></Contacter><OccupancyInfoList><OccupancyInfo><AdultsCount>2</AdultsCount><ChildrenCount>0</ChildrenCount><ChildrenAges>0</ChildrenAges><AdultsInfoList><AdultsInfo><FirstName/><LastName/></AdultsInfo></AdultsInfoList><ChildrenInfoList/></OccupancyInfo></OccupancyInfoList></CreateHotelOrderRequest></Request>
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/order/createOrder    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    <ResultFlag>1</ResultFlag>
+
+N-12_订单状态推送
+    ${data}    Create dictionary    hotelid=431
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/hotel/price/syncrateinfo    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    <ResultMsg>成功</ResultMsg>
+
+N-13_酒店基本信息查询
+    ${data}    Create dictionary    fcHotelIds=123101
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/hotel/getHotelInfo    data=${data}
+    ${jsondata}=    To Json    ${resp.text}    pretty_print=True
+    log    ${jsondata}
+
+N-14_取消订单
+    ${data}    Create dictionary    xml=<?xml version="1.0" encoding="utf-8"?><Request><Header TimeStamp="2014-02-16 15:36:48" PartnerCode="F01202154" RequestType="cancelHotelOrder" Signature="1A9C4DA2E0525DA64CEFD96B18F7981A"/><CancelHotelOrderRequest><SpOrderId>36371</SpOrderId><CancelReason>退改申请原因</CancelReason></CancelHotelOrderRequest></Request>    orderId=36405
+    Create Session    api.fangbaba.cc    ${URL}
+    ${resp}    Post Request    api.fangbaba.cc    /fangcang/order/cancelHotelOrderTest    data=${data}
+    log    ${resp.text}
+    Should Contain    ${resp.text}    <ResultFlag>0</ResultFlag>

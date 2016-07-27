@@ -1,0 +1,13 @@
+*** Settings ***
+Resource          resources/keywords.txt
+
+*** Test Cases ***
+N-01_查询酒店老板账户余额_必填参数缺失
+    ${headers}=    Set Headers
+    ${data}=    Create dictionary    userId=    hotelId=${hotelId_sc}
+    Create Session    openapi.fangbaba.cc    ${URL}    headers=${headers}
+    ${resp}=    Post Request    openapi.fangbaba.cc    /oms/stlmt/balance    data=${data}
+    ${jsondata}=    To Json    ${resp.text}    pretty_print=True
+    log    ${jsondata}
+    Dictionary Should Contain Key    ${resp.json()}    _ERRORMESSAGE_
+    Dictionary Should Contain Value    ${resp.json()}    必须的接口参数不能为空.
